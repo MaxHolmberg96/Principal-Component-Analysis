@@ -1,6 +1,6 @@
 # Principal component analysis (PCA) and Kernel Principal component analysis (KPCA)
-## Results:
-## PCA on toy dataset (MNIST):
+
+## PCA on MNIST:
 ![alt text](https://raw.githubusercontent.com/MaxHolmberg96/pca/master/pca.png)
 
 ## KPCA with rbf kernel:
