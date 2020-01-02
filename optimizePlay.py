@@ -2,6 +2,8 @@ import numpy as np
 from scipy.optimize import fmin_cg
 from scipy import optimize
 import matplotlib.pyplot as plt
+import matplotlib
+import time
 
 """
 args = (2, 3, 7, 8, 9, 10)  # parameter values
@@ -56,29 +58,47 @@ def rbf(X, l=10):
 
 def solver_callback(x):
     global iter
+    global start_time
+    global args_K
     #print(x)
     print(f"solver_callback iter {iter}")
+    print(f"seconds passed {time.time() - start_time}")
+
+    if(iter % 20 == 0):
+        save_string = "result" + str(iter) + ".npy"
+        current_loglike = fK(x, *args_K)
+        print(f"current loglike: {current_loglike}")
+        np.save(save_string, x)
     iter = iter + 1
 
-iter = 1
+iter = 0
 N = 100
-Y = np.load("/Users/samling/Desktop/KTH/AML_project/pca/data.npz")['Y']
+#Y = np.load("/Users/samling/Desktop/KTH/AML_project/pca/data.npz")['Y']
+Y = np.load("data.npz")['Y']
+
 D = 12
 
 q = 2
 cov_matrix = np.identity(q)
 y_cov_matrix = np.identity(D)
-x0 = np.random.multivariate_normal(np.zeros((q)), cov_matrix,N)
+#x0 = np.random.multivariate_normal(np.zeros((q)), cov_matrix,N)
+x0 = np.load("result.npy")
 #Y = np.random.multivariate_normal(np.zeros((D)), y_cov_matrix,N)
 args_K = (D,N,Y,rbf)
 
 print(f"x0 {x0.shape}")
 print(f"Y {Y.shape}")
-res2 = optimize.fmin_cg(fK, x0, fprime=None, args=args_K, callback=solver_callback, maxiter=10)
-
+start_time = time.time()
+res2 = optimize.fmin_cg(fK, x0, fprime=None, args=args_K, callback=solver_callback, maxiter=0)
+finish_time = time.time()
+print(f"total run time {finish_time - start_time}")
+np.save("result.npy",res2)
 result = np.reshape(res2, (N,2))
 
 a,b = result.T
-
-plt.scatter(a,b)
+print(f"a {a.shape}")
+print(f"b {b.shape}")
+colors = ['red','green','blue']
+labels = np.load("data.npz")["labels"]
+plt.scatter(a,b,c=labels, cmap=matplotlib.colors.ListedColormap(colors))
 plt.show()
